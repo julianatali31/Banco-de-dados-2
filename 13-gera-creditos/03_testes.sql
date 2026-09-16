@@ -1,50 +1,50 @@
 -- =============================================================================
--- Exercício: Laços com banco de dados - geração de créditos (recebimentos)
--- Arquivo: 03_testes.sql
--- Reproduz o exemplo do enunciado e exercita alguns casos extras.
+-- exercício: laços com banco de dados - geração de créditos (recebimentos)
+-- arquivo: 03_testes.sql
+-- reproduz o exemplo do enunciado e exercita alguns casos extras.
 -- =============================================================================
 
-DELETE FROM recebimentos;
-DELETE FROM atendimentos;
-DELETE FROM pessoas;
+delete from recebimentos;
+delete from atendimentos;
+delete from pessoas;
 
-INSERT INTO pessoas (codigo, nome) VALUES
-    (1, 'Funcionário 1'),
-    (2, 'Cliente 2'),
-    (3, 'Técnico 3');
-SELECT setval(pg_get_serial_sequence('pessoas', 'codigo'), 3);
+insert into pessoas (codigo, nome) values
+    (1, 'funcionário 1'),
+    (2, 'cliente 2'),
+    (3, 'técnico 3');
+select setval(pg_get_serial_sequence('pessoas', 'codigo'), 3);
 
--- Exemplo do enunciado -------------------------------------------------------
-INSERT INTO atendimentos
+-- exemplo do enunciado -------------------------------------------------------
+insert into atendimentos
     (codigo, data, condicao, total, pessoa_funcionario, pessoa_cliente, pessoa_tecnico, prazo, nro_parcelas)
-VALUES
-    (1, DATE '2026-08-05', 'V',  200.00, 1, NULL, NULL, 0, 1),   -- à vista
-    (2, DATE '2026-08-05', 'P', 1000.00, 1,    2, NULL, 2, 2);   -- a prazo, 2x
+values
+    (1, date '2026-08-05', 'v',  200.00, 1, null, null, 0, 1),   -- à vista
+    (2, date '2026-08-05', 'p', 1000.00, 1,    2, null, 2, 2);   -- a prazo, 2x
 
--- Casos extras ---------------------------------------------------------------
-INSERT INTO atendimentos
+-- casos extras ---------------------------------------------------------------
+insert into atendimentos
     (codigo, data, condicao, total, pessoa_funcionario, pessoa_cliente, pessoa_tecnico, prazo, nro_parcelas)
-VALUES
-    (3, DATE '2026-08-31', 'P', 100.00, 1, 2, NULL, 3, 3);       -- divisão inexata + fim de mês
-SELECT setval(pg_get_serial_sequence('atendimentos', 'codigo'), 3);
+values
+    (3, date '2026-08-31', 'p', 100.00, 1, 2, null, 3, 3);       -- divisão inexata + fim de mês
+select setval(pg_get_serial_sequence('atendimentos', 'codigo'), 3);
 
-SELECT gera_creditos(1) AS parcelas_atendimento_1;
-SELECT gera_creditos(2) AS parcelas_atendimento_2;
-SELECT gera_creditos(3) AS parcelas_atendimento_3;
+select gera_creditos(1) as parcelas_atendimento_1;
+select gera_creditos(2) as parcelas_atendimento_2;
+select gera_creditos(3) as parcelas_atendimento_3;
 
--- Re-executar não duplica os créditos
-SELECT gera_creditos(2) AS reprocessa_atendimento_2;
+-- re-executar não duplica os créditos
+select gera_creditos(2) as reprocessa_atendimento_2;
 
-SELECT codigo, atendimento, vencimento, valor, pagamento
-  FROM recebimentos
- ORDER BY atendimento, codigo;
+select codigo, atendimento, vencimento, valor, pagamento
+  from recebimentos
+ order by atendimento, codigo;
 
--- Conferência: a soma das parcelas tem de fechar com o total do atendimento
-SELECT a.codigo,
+-- conferência: a soma das parcelas tem de fechar com o total do atendimento
+select a.codigo,
        a.total,
-       SUM(r.valor) AS soma_parcelas,
-       COUNT(*)     AS qtd_parcelas
-  FROM atendimentos a
-  JOIN recebimentos r ON r.atendimento = a.codigo
- GROUP BY a.codigo, a.total
- ORDER BY a.codigo;
+       sum(r.valor) as soma_parcelas,
+       count(*)     as qtd_parcelas
+  from atendimentos a
+  join recebimentos r on r.atendimento = a.codigo
+ group by a.codigo, a.total
+ order by a.codigo;

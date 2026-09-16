@@ -21,7 +21,7 @@ psql -d seu_banco -f 03_testes.sql
 
 ## Regras implementadas
 
-- **À vista**: `condicao = 'V'` **e** `nro_parcelas = 1` **e** `prazo = 0`.
+- **À vista**: `condicao = 'v'` **e** `nro_parcelas = 1` **e** `prazo = 0`.
   Gera uma única parcela, vencendo na data do atendimento e já quitada
   (`pagamento` = data do atendimento).
 - **A prazo**: gera `nro_parcelas` registros. A 1ª parcela vence na data do
@@ -38,10 +38,10 @@ psql -d seu_banco -f 03_testes.sql
 
 | codigo | data | condicao | total | prazo | nro_parcelas |
 | --- | --- | --- | --- | --- | --- |
-| 1 | 2026-08-05 | V | 200.00 | 0 | 1 |
-| 2 | 2026-08-05 | P | 1000.00 | 2 | 2 |
+| 1 | 2026-08-05 | v | 200.00 | 0 | 1 |
+| 2 | 2026-08-05 | p | 1000.00 | 2 | 2 |
 
-`recebimentos` (depois de `SELECT gera_creditos(1); SELECT gera_creditos(2);`)
+`recebimentos` (depois de `select gera_creditos(1); select gera_creditos(2);`)
 
 | codigo | atendimento | vencimento | valor | pagamento |
 | --- | --- | --- | --- | --- |

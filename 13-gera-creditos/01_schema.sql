@@ -1,53 +1,53 @@
 -- =============================================================================
--- Exercício: Laços com banco de dados - geração de créditos (recebimentos)
--- Arquivo: 01_schema.sql
--- Estrutura mínima necessária para o exercício (PostgreSQL).
+-- exercício: laços com banco de dados - geração de créditos (recebimentos)
+-- arquivo: 01_schema.sql
+-- estrutura mínima necessária para o exercício (postgresql).
 -- =============================================================================
 
-CREATE TABLE IF NOT EXISTS pessoas (
-    codigo SERIAL PRIMARY KEY,
-    nome   VARCHAR(60) NOT NULL
+create table if not exists pessoas (
+    codigo serial primary key,
+    nome   varchar(60) not null
 );
 
-CREATE TABLE IF NOT EXISTS atendimentos (
-    codigo            SERIAL PRIMARY KEY,
-    data              DATE          NOT NULL DEFAULT CURRENT_DATE,
-    condicao          CHARACTER(1)  NOT NULL DEFAULT 'V',
-    total             NUMERIC(10,2) NOT NULL DEFAULT 0,
-    pessoa_funcionario INTEGER REFERENCES pessoas (codigo),
-    pessoa_cliente     INTEGER REFERENCES pessoas (codigo),
-    pessoa_tecnico     INTEGER REFERENCES pessoas (codigo)
+create table if not exists atendimentos (
+    codigo             serial primary key,
+    data               date          not null default current_date,
+    condicao           character(1)  not null default 'v',
+    total              numeric(10,2) not null default 0,
+    pessoa_funcionario integer references pessoas (codigo),
+    pessoa_cliente     integer references pessoas (codigo),
+    pessoa_tecnico     integer references pessoas (codigo)
 );
 
 -- ---------------------------------------------------------------------------
--- Pedido do enunciado: criar os campos nro_parcelas e prazo em atendimentos.
+-- pedido do enunciado: criar os campos nro_parcelas e prazo em atendimentos.
 -- ---------------------------------------------------------------------------
-ALTER TABLE atendimentos ADD COLUMN IF NOT EXISTS nro_parcelas INTEGER NOT NULL DEFAULT 1;
-ALTER TABLE atendimentos ADD COLUMN IF NOT EXISTS prazo        INTEGER NOT NULL DEFAULT 0;
+alter table atendimentos add column if not exists nro_parcelas integer not null default 1;
+alter table atendimentos add column if not exists prazo        integer not null default 0;
 
-ALTER TABLE atendimentos DROP CONSTRAINT IF EXISTS atendimentos_nro_parcelas_ck;
-ALTER TABLE atendimentos ADD  CONSTRAINT atendimentos_nro_parcelas_ck CHECK (nro_parcelas >= 1);
+alter table atendimentos drop constraint if exists atendimentos_nro_parcelas_ck;
+alter table atendimentos add  constraint atendimentos_nro_parcelas_ck check (nro_parcelas >= 1);
 
-ALTER TABLE atendimentos DROP CONSTRAINT IF EXISTS atendimentos_prazo_ck;
-ALTER TABLE atendimentos ADD  CONSTRAINT atendimentos_prazo_ck CHECK (prazo >= 0);
+alter table atendimentos drop constraint if exists atendimentos_prazo_ck;
+alter table atendimentos add  constraint atendimentos_prazo_ck check (prazo >= 0);
 
-ALTER TABLE atendimentos DROP CONSTRAINT IF EXISTS atendimentos_condicao_ck;
-ALTER TABLE atendimentos ADD  CONSTRAINT atendimentos_condicao_ck CHECK (UPPER(condicao) IN ('V', 'P'));
+alter table atendimentos drop constraint if exists atendimentos_condicao_ck;
+alter table atendimentos add  constraint atendimentos_condicao_ck check (lower(condicao) in ('v', 'p'));
 
-COMMENT ON COLUMN atendimentos.condicao     IS 'Condição de pagamento: V = à vista, P = a prazo';
-COMMENT ON COLUMN atendimentos.nro_parcelas IS 'Em quantas parcelas o atendimento será recebido';
-COMMENT ON COLUMN atendimentos.prazo        IS 'Prazo do atendimento; 0 identifica venda à vista';
+comment on column atendimentos.condicao     is 'condição de pagamento: v = à vista, p = a prazo';
+comment on column atendimentos.nro_parcelas is 'em quantas parcelas o atendimento será recebido';
+comment on column atendimentos.prazo        is 'prazo do atendimento; 0 identifica venda à vista';
 
 -- ---------------------------------------------------------------------------
--- Créditos gerados a partir do atendimento.
--- A PK é composta: cada atendimento numera suas parcelas a partir de 1.
+-- créditos gerados a partir do atendimento.
+-- a pk é composta: cada atendimento numera suas parcelas a partir de 1.
 -- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS recebimentos (
-    codigo      INTEGER       NOT NULL,
-    atendimento INTEGER       NOT NULL REFERENCES atendimentos (codigo) ON DELETE CASCADE,
-    vencimento  DATE          NOT NULL,
-    valor       NUMERIC(10,2) NOT NULL,
-    pagamento   DATE,
-    CONSTRAINT recebimentos_pk    PRIMARY KEY (codigo, atendimento),
-    CONSTRAINT recebimentos_valor_ck CHECK (valor > 0)
+create table if not exists recebimentos (
+    codigo      integer       not null,
+    atendimento integer       not null references atendimentos (codigo) on delete cascade,
+    vencimento  date          not null,
+    valor       numeric(10,2) not null,
+    pagamento   date,
+    constraint recebimentos_pk       primary key (codigo, atendimento),
+    constraint recebimentos_valor_ck check (valor > 0)
 );
