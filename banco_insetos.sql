@@ -111,6 +111,10 @@ begin
     where inseto = p_inseto
       and cultura = p_cultura;
 
+    if v_valor_dano is null then
+        raise exception 'nao existe dano cadastrado para o inseto % na cultura %', p_inseto, p_cultura;
+    end if;
+
     v_data := p_data_inicio;
 
     while v_data <= p_data_fim loop
