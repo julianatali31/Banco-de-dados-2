@@ -38,6 +38,26 @@ create table lancamentos (
 
 
 -- ============================================================
+-- dados de exemplo (para testar as funcoes abaixo)
+-- ============================================================
+
+insert into insetos (codigo, nome) values
+    (60, 'lagarta-do-cartucho'),
+    (15, 'percevejo'),
+    (30, 'pulgao');
+
+insert into culturas (codigo, descricao) values
+    (10, 'soja'),
+    (20, 'milho'),
+    (60, 'trigo');
+
+insert into insetos_danos (inseto, cultura, valor_dano) values
+    (60, 10, 15.50), -- lagarta na soja
+    (15, 20, 8.00),  -- percevejo no milho
+    (30, 60, 5.25);  -- pulgao no trigo
+
+
+-- ============================================================
 -- questao 5 - soma do total de danos de uma cultura num periodo
 -- ============================================================
 
@@ -63,10 +83,8 @@ end;
 $$
 language 'plpgsql';
 
--- teste:
-select f_soma_dano_cultura('2026-09-23', '2026-09-30', 10);
-select f_soma_dano_cultura('2026-09-23', '2026-09-30', 60);
-select f_soma_dano_cultura('2026-09-23', '2026-09-30', 20);
+-- teste: ver a secao "executando os testes" no final do arquivo
+-- (essa funcao so retorna valor depois que a questao 6 gerar os lancamentos)
 
 
 -- ============================================================
@@ -105,8 +123,7 @@ end;
 $$
 language 'plpgsql';
 
--- teste:
-select f_gerar_lancamentos('2026-09-23', '2026-09-30', 10, 60, 20);
+-- teste: ver a secao "executando os testes" no final do arquivo
 
 
 -- ============================================================
@@ -150,5 +167,26 @@ end;
 $$
 language 'plpgsql';
 
--- teste:
+-- teste: ver a secao "executando os testes" no final do arquivo
+
+
+-- ============================================================
+-- executando os testes (ordem importa: primeiro gera os dados
+-- com a funcao da questao 6, depois testa as questoes 5 e 7)
+-- ============================================================
+
+-- questao 6: gera lancamentos para as 3 culturas de exemplo, de 23/09 a 30/09/2026
+select f_gerar_lancamentos('2026-09-23', '2026-09-30', 10, 60, 20); -- soja, lagarta, qtd 20/dia
+select f_gerar_lancamentos('2026-09-23', '2026-09-30', 20, 15, 10); -- milho, percevejo, qtd 10/dia
+select f_gerar_lancamentos('2026-09-23', '2026-09-30', 60, 30, 50); -- trigo, pulgao, qtd 50/dia
+
+-- conferindo os lancamentos gerados:
+select * from lancamentos order by cultura, data;
+
+-- questao 5: soma do dano por cultura no periodo
+select f_soma_dano_cultura('2026-09-23', '2026-09-30', 10); -- soja
+select f_soma_dano_cultura('2026-09-23', '2026-09-30', 20); -- milho
+select f_soma_dano_cultura('2026-09-23', '2026-09-30', 60); -- trigo
+
+-- questao 7: cultura de maior dano no periodo (usando cursor)
 select * from f_cultura_maior_dano('2026-09-23', '2026-09-30');
